@@ -302,16 +302,101 @@ void CLI::AddBill() {
     
     Bill bill;
     bill.SetAmount(amount);
-    bill.SetCategory(std::make_shared<Category>(categories[cat_choice - 1]));
+    auto chosen_category = std::make_shared<Category>(categories[cat_choice - 1]);
+    bill.SetCategory(chosen_category);
     bill.SetContent(content);
     bill.SetTime(std::chrono::system_clock::now());
-    
-    if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
-        PrintSuccess("账单添加成功");
-    } else {
-        PrintError("账单添加失败，可能超出预算");
+
+    // 先检查是否会超出预算
+    bool within = account_manager_->CanAddBill(current_user_->GetUserId(), bill);
+    if (within) {
+        if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
+            PrintSuccess("账单添加成功");
+        } else {
+            PrintError("账单添加失败");
+        }
+        Pause();
+        return;
     }
-    
+
+    // 超出预算，给用户选项：忽略（将把分类预算提高到账单金额）、提高分类预算、提高总预算、取消
+    PrintError("该账单可能超出预算");
+    std::cout << "请选择处理方式:\n";
+    std::cout << "  1. 忽略预算并添加（将自动把该分类预算提高到账单金额）\n";
+    std::cout << "  2. 提高该分类预算后添加\n";
+    std::cout << "  3. 提高总预算后添加\n";
+    std::cout << "  0. 取消\n";
+
+    int choice = GetIntInput("选择 (0-3): ");
+
+    if (choice == 0) {
+        PrintInfo("已取消添加账单");
+        Pause();
+        return;
+    }
+
+    // 取得当前预算（若不存在则新建）
+    auto cur_budget_ptr = account_manager_->GetBudget(current_user_->GetUserId());
+    Budget new_budget;
+    if (cur_budget_ptr) new_budget = *cur_budget_ptr;
+
+    int cat_id = chosen_category->GetCategoryId();
+
+    if (choice == 1) {
+        // 忽略：把分类预算设为至少账单金额
+        double new_limit = std::max(new_budget.GetCategoryLimit(cat_id), amount);
+        new_budget.SetCategoryLimit(cat_id, new_limit);
+        if (!account_manager_->SetBudget(current_user_->GetUserId(), new_budget)) {
+            PrintError("提高分类预算失败，无法添加账单");
+            Pause();
+            return;
+        }
+        if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
+            PrintSuccess("已提高分类预算并添加账单");
+        } else {
+            PrintError("添加账单失败");
+        }
+        Pause();
+        return;
+    }
+
+    if (choice == 2) {
+        // 提高分类预算到用户输入的值
+        double new_limit = GetDoubleInput("输入新的分类预算限额: ");
+        new_budget.SetCategoryLimit(cat_id, new_limit);
+        if (!account_manager_->SetBudget(current_user_->GetUserId(), new_budget)) {
+            PrintError("设置分类预算失败");
+            Pause();
+            return;
+        }
+        if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
+            PrintSuccess("已设置分类预算并添加账单");
+        } else {
+            PrintError("添加账单失败");
+        }
+        Pause();
+        return;
+    }
+
+    if (choice == 3) {
+        // 提高总预算
+        double new_total = GetDoubleInput("输入新的总预算限额: ");
+        new_budget.SetTotalLimit(new_total);
+        if (!account_manager_->SetBudget(current_user_->GetUserId(), new_budget)) {
+            PrintError("设置总预算失败");
+            Pause();
+            return;
+        }
+        if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
+            PrintSuccess("已设置总预算并添加账单");
+        } else {
+            PrintError("添加账单失败");
+        }
+        Pause();
+        return;
+    }
+
+    PrintError("无效选择，取消操作");
     Pause();
 }
 

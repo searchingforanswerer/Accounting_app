@@ -73,6 +73,9 @@ public:
                           Period period, ChartType chart_type);
     std::optional<Report> GetLastReport(int user_id) const;
 
+    // 检查在添加该账单前是否满足预算（公开包装，供 UI/CLI 检查使用）
+    bool CanAddBill(int user_id, const Bill& bill) const;
+
 private:
     // === 内部组件 ===
     std::shared_ptr<Storage> storage_;
@@ -84,7 +87,9 @@ private:
     std::unique_ptr<ReportManager> report_manager_;
 
     // === 内部逻辑 ===
-    bool CheckBudgetBeforeAdd(int user_id, const Bill& bill);
+    // 注意：此方法不修改对象状态，因此标记为 const，使得
+    // 在 const 上下文（例如 CanAddBill）中可安全调用。
+    bool CheckBudgetBeforeAdd(int user_id, const Bill& bill) const;
 };
 
 }  // namespace accounting

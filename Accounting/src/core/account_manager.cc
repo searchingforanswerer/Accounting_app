@@ -39,7 +39,7 @@ std::shared_ptr<User> AccountManager::Login(const std::string& username, const s
 }
 
 // === 账单 ===
-bool AccountManager::CheckBudgetBeforeAdd(int user_id, const Bill& bill) {
+bool AccountManager::CheckBudgetBeforeAdd(int user_id, const Bill& bill) const {
     auto budget = budget_manager_.GetBudget(user_id);
     if (!budget) return true;  // 没设置预算则直接通过
     return budget_manager_.CheckLimit(user_id, bill);
@@ -105,6 +105,10 @@ Report AccountManager::GenerateReport(int user_id, const QueryCriteria& criteria
 
 std::optional<Report> AccountManager::GetLastReport(int user_id) const {
     return report_manager_->GetLastReport(user_id);
+}
+
+bool AccountManager::CanAddBill(int user_id, const Bill& bill) const {
+    return CheckBudgetBeforeAdd(user_id, bill);
 }
 
 }  // namespace accounting
