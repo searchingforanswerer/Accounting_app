@@ -14,8 +14,20 @@ bool CategoryManager::AddCategory(const User& user, const Category& category) {
     if (IsDuplicateCategoryName(user, category.GetName())) {
         return false;  // 名称重复
     }
+    // 复制一份，可以随便改 id
+    Category new_cat = category;
 
-    user_categories.push_back(category);
+    // 为该用户生成一个新的 category_id
+    int new_id = 1;
+    for (const auto& c : user_categories) {
+        if (c.GetCategoryId() >= new_id) {
+            new_id = c.GetCategoryId() + 1;
+        }
+    }
+    new_cat.SetCategoryId(new_id);
+
+
+    user_categories.push_back(new_cat);
     return true;
 }
 

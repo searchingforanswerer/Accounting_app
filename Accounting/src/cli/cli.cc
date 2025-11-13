@@ -101,12 +101,13 @@ void CLI::RegisterNewUser() {
     std::string username = GetUserInput("请输入用户名: ");
     std::string password = GetUserInput("请输入密码: ");
     
-    if (account_manager_->RegisterUser(username, password)) {
+    auto res = account_manager_->RegisterUserEx(username, password);
+    if (res.IsSuccess()) {
         PrintSuccess("用户 [" + username + "] 注册成功");
         // 自动登录
-        current_user_ = account_manager_->Login(username, password);
+        current_user_ = res.GetData();
     } else {
-        PrintError("注册失败，用户可能已存在");
+        PrintError(std::string("注册失败: ") + res.GetErrorMessage());
     }
     
     Pause();
@@ -118,12 +119,13 @@ void CLI::LoginUser() {
     std::string username = GetUserInput("请输入用户名: ");
     std::string password = GetUserInput("请输入密码: ");
     
-    current_user_ = account_manager_->Login(username, password);
-    
-    if (current_user_) {
+    auto res = account_manager_->LoginEx(username, password);
+    if (res.IsSuccess()) {
+        current_user_ = res.GetData();
         PrintSuccess("登录成功，欢迎 " + username + "！");
     } else {
-        PrintError("登录失败，用户名或密码错误");
+        current_user_ = nullptr;
+        PrintError(std::string("登录失败: ") + res.GetErrorMessage());
     }
     
     Pause();
@@ -198,10 +200,11 @@ void CLI::AddCategory() {
     
     Category cat(0, name, type, color);  // ID 由系统生成
     
-    if (account_manager_->AddCategory(*current_user_, cat)) {
+    auto res = account_manager_->AddCategoryEx(*current_user_, cat);
+    if (res.IsSuccess()) {
         PrintSuccess("分类 [" + name + "] 添加成功");
     } else {
-        PrintError("分类添加失败，可能名称重复");
+        PrintError(std::string("分类添加失败: ") + res.GetErrorMessage());
     }
     
     Pause();
@@ -234,10 +237,11 @@ void CLI::DeleteCategory() {
     
     int category_id = GetIntInput("输入要删除的分类ID: ");
     
-    if (account_manager_->DeleteCategory(*current_user_, category_id)) {
+    auto res = account_manager_->DeleteCategoryEx(*current_user_, category_id);
+    if (res.IsSuccess()) {
         PrintSuccess("分类删除成功");
     } else {
-        PrintError("分类删除失败");
+        PrintError(std::string("分类删除失败: ") + res.GetErrorMessage());
     }
     
     Pause();
@@ -305,15 +309,31 @@ void CLI::AddBill() {
     auto chosen_category = std::make_shared<Category>(categories[cat_choice - 1]);
     bill.SetCategory(chosen_category);
     bill.SetContent(content);
-    bill.SetTime(std::chrono::system_clock::now());
+
+    // 选择时间：默认使用当前时间，或自定义日期和时间
+    std::string use_now = GetUserInput("使用当前时间? (y/n): ");
+    if (use_now.empty() || use_now == "y" || use_now == "Y") {
+        bill.SetTime(std::chrono::system_clock::now());
+    } else {
+        std::string date_str = GetUserInput("输入日期 (YYYY-MM-DD): ");
+        std::string time_str = GetUserInput("输入时间 (HH:MM 或 HH:MM:SS): ");
+        std::chrono::system_clock::time_point tp;
+        if (!account_manager_->ParseDateTimeStringToTimePoint(date_str, time_str, tp)) {
+            PrintError("日期或时间格式错误，使用当前时间");
+            bill.SetTime(std::chrono::system_clock::now());
+        } else {
+            bill.SetTime(tp);
+        }
+    }
 
     // 先检查是否会超出预算
     bool within = account_manager_->CanAddBill(current_user_->GetUserId(), bill);
     if (within) {
-        if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
+        auto add_res = account_manager_->AddBillEx(current_user_->GetUserId(), bill);
+        if (add_res.IsSuccess()) {
             PrintSuccess("账单添加成功");
         } else {
-            PrintError("账单添加失败");
+            PrintError(std::string("账单添加失败: ") + add_res.GetErrorMessage());
         }
         Pause();
         return;
@@ -346,15 +366,21 @@ void CLI::AddBill() {
         // 忽略：把分类预算设为至少账单金额
         double new_limit = std::max(new_budget.GetCategoryLimit(cat_id), amount);
         new_budget.SetCategoryLimit(cat_id, new_limit);
-        if (!account_manager_->SetBudget(current_user_->GetUserId(), new_budget)) {
-            PrintError("提高分类预算失败，无法添加账单");
-            Pause();
-            return;
+        {
+            auto set_res = account_manager_->SetBudgetEx(current_user_->GetUserId(), new_budget);
+            if (set_res.IsFailure()) {
+                PrintError(std::string("提高分类预算失败: ") + set_res.GetErrorMessage());
+                Pause();
+                return;
+            }
         }
-        if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
-            PrintSuccess("已提高分类预算并添加账单");
-        } else {
-            PrintError("添加账单失败");
+        {
+            auto add_res = account_manager_->AddBillEx(current_user_->GetUserId(), bill);
+            if (add_res.IsSuccess()) {
+                PrintSuccess("已提高分类预算并添加账单");
+            } else {
+                PrintError(std::string("添加账单失败: ") + add_res.GetErrorMessage());
+            }
         }
         Pause();
         return;
@@ -364,15 +390,21 @@ void CLI::AddBill() {
         // 提高分类预算到用户输入的值
         double new_limit = GetDoubleInput("输入新的分类预算限额: ");
         new_budget.SetCategoryLimit(cat_id, new_limit);
-        if (!account_manager_->SetBudget(current_user_->GetUserId(), new_budget)) {
-            PrintError("设置分类预算失败");
-            Pause();
-            return;
+        {
+            auto set_res = account_manager_->SetBudgetEx(current_user_->GetUserId(), new_budget);
+            if (set_res.IsFailure()) {
+                PrintError(std::string("设置分类预算失败: ") + set_res.GetErrorMessage());
+                Pause();
+                return;
+            }
         }
-        if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
-            PrintSuccess("已设置分类预算并添加账单");
-        } else {
-            PrintError("添加账单失败");
+        {
+            auto add_res = account_manager_->AddBillEx(current_user_->GetUserId(), bill);
+            if (add_res.IsSuccess()) {
+                PrintSuccess("已设置分类预算并添加账单");
+            } else {
+                PrintError(std::string("添加账单失败: ") + add_res.GetErrorMessage());
+            }
         }
         Pause();
         return;
@@ -382,15 +414,21 @@ void CLI::AddBill() {
         // 提高总预算
         double new_total = GetDoubleInput("输入新的总预算限额: ");
         new_budget.SetTotalLimit(new_total);
-        if (!account_manager_->SetBudget(current_user_->GetUserId(), new_budget)) {
-            PrintError("设置总预算失败");
-            Pause();
-            return;
+        {
+            auto set_res = account_manager_->SetBudgetEx(current_user_->GetUserId(), new_budget);
+            if (set_res.IsFailure()) {
+                PrintError(std::string("设置总预算失败: ") + set_res.GetErrorMessage());
+                Pause();
+                return;
+            }
         }
-        if (account_manager_->AddBill(current_user_->GetUserId(), bill)) {
-            PrintSuccess("已设置总预算并添加账单");
-        } else {
-            PrintError("添加账单失败");
+        {
+            auto add_res = account_manager_->AddBillEx(current_user_->GetUserId(), bill);
+            if (add_res.IsSuccess()) {
+                PrintSuccess("已设置总预算并添加账单");
+            } else {
+                PrintError(std::string("添加账单失败: ") + add_res.GetErrorMessage());
+            }
         }
         Pause();
         return;
@@ -435,10 +473,11 @@ void CLI::UpdateBill() {
     for (auto& bill : bills) {
         if (bill.GetBillId() == bill_id) {
             bill.SetAmount(new_amount);
-            if (account_manager_->UpdateBill(current_user_->GetUserId(), bill)) {
+            auto res = account_manager_->UpdateBillEx(current_user_->GetUserId(), bill);
+            if (res.IsSuccess()) {
                 PrintSuccess("账单修改成功");
             } else {
-                PrintError("账单修改失败");
+                PrintError(std::string("账单修改失败: ") + res.GetErrorMessage());
             }
             Pause();
             return;
@@ -456,10 +495,11 @@ void CLI::DeleteBill() {
     
     int bill_id = GetIntInput("输入要删除的账单ID: ");
     
-    if (account_manager_->DeleteBill(current_user_->GetUserId(), bill_id)) {
+    auto res = account_manager_->DeleteBillEx(current_user_->GetUserId(), bill_id);
+    if (res.IsSuccess()) {
         PrintSuccess("账单删除成功");
     } else {
-        PrintError("账单删除失败");
+        PrintError(std::string("账单删除失败: ") + res.GetErrorMessage());
     }
     
     Pause();
@@ -521,10 +561,11 @@ void CLI::SetBudget() {
         }
     }
     
-    if (account_manager_->SetBudget(current_user_->GetUserId(), budget)) {
+    auto res = account_manager_->SetBudgetEx(current_user_->GetUserId(), budget);
+    if (res.IsSuccess()) {
         PrintSuccess("预算设置成功");
     } else {
-        PrintError("预算设置失败");
+        PrintError(std::string("预算设置失败: ") + res.GetErrorMessage());
     }
     
     Pause();
