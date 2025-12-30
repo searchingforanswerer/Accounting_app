@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/accounting_cli.dir/src/cli_main.cc.o -o /home/zchcn/SE/Accounting/bin/accounting_cli  lib/libaccounting_lib.a 

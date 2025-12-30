@@ -1,0 +1,38 @@
+[
+    [
+        1,
+        {
+            "category_limits": [
+                {
+                    "category_id": 3,
+                    "limit": 500.0
+                },
+                {
+                    "category_id": 2,
+                    "limit": 500.0
+                },
+                {
+                    "category_id": 1,
+                    "limit": 500.0
+                }
+            ],
+            "total_limit": 1000.0
+        }
+    ],
+    [
+        2,
+        {
+            "category_limits": [
+                {
+                    "category_id": 3,
+                    "limit": 500.0
+                },
+                {
+                    "category_id": 2,
+                    "limit": 500.0
+                }
+            ],
+            "total_limit": 1000.0
+        }
+    ]
+]
