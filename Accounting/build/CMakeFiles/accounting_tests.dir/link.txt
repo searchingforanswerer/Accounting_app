@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/accounting_tests.dir/test/test_bill.cpp.o CMakeFiles/accounting_tests.dir/test/test_category.cpp.o -o /home/zchcn/SE/Accounting/bin/accounting_tests  lib/libaccounting_lib.a /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a 

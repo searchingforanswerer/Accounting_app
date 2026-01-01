@@ -1,0 +1,13 @@
+[
+    [
+        1,
+        [
+            {
+                "category_id": 1,
+                "color": "#FF6B6B",
+                "name": "餐饮",
+                "type": "expense"
+            }
+        ]
+    ]
+]

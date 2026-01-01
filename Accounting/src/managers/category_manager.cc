@@ -26,7 +26,6 @@ bool CategoryManager::AddCategory(const User& user, const Category& category) {
     }
     new_cat.SetCategoryId(new_id);
 
-
     user_categories.push_back(new_cat);
     return true;
 }

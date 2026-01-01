@@ -34,6 +34,11 @@ public:
     bool LoadFromStorage();
     bool SaveToStorage() const;
 
+    // 添加一个测试用的公开接口，临时用于测试
+    bool TestIsDuplicateCategoryNameForTest(const User& user, const std::string& name) const {
+        return IsDuplicateCategoryName(user, name);
+    }
+
 private:
     // 检查用户的分类名是否重复
     bool IsDuplicateCategoryName(const User& user, const std::string& name) const;

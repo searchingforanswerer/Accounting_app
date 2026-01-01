@@ -1,0 +1,35 @@
+[
+    [
+        1,
+        [
+            {
+                "amount": 50.0,
+                "bill_id": 1,
+                "category_id": 1,
+                "content": "午餐",
+                "time": "2025-12-31 18:49:17"
+            },
+            {
+                "amount": 50.0,
+                "bill_id": 2,
+                "category_id": 1,
+                "content": "午餐",
+                "time": "2025-12-31 18:49:23"
+            },
+            {
+                "amount": 50.0,
+                "bill_id": 3,
+                "category_id": 1,
+                "content": "午餐",
+                "time": "2025-12-31 18:49:24"
+            },
+            {
+                "amount": 50.0,
+                "bill_id": 4,
+                "category_id": 1,
+                "content": "午餐",
+                "time": "2025-12-31 18:50:28"
+            }
+        ]
+    ]
+]

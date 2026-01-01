@@ -119,3 +119,75 @@ message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Source Directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "Binary Directory: ${CMAKE_CURRENT_BINARY_DIR}")
+
+# ==================== 添加测试 ========================
+
+# 查找 GoogleTest 包
+find_package(GTest REQUIRED)
+
+# 指定测试源文件
+set(TEST_BILL_SOURCES
+    test/test_bill.cpp
+)
+
+set(TEST_CATEGORY_SOURCES
+    test/test_category.cpp
+)
+
+set(TEST_BOTTOM_TO_TOP_SOURCES
+    test/ITtest_bottom_to_top.cpp 
+)
+
+set(TEST_INTEGRATION_SOURCES
+    test/ITtest_top_to_bottom.cpp
+)
+
+# 创建测试可执行文件 - 针对 test_bill.cpp
+add_executable(accounting_test_bill ${TEST_BILL_SOURCES})
+
+# 创建测试可执行文件 - 针对 test_category.cpp
+add_executable(accounting_test_category ${TEST_CATEGORY_SOURCES})
+
+# 创建测试可执行文件 - 针对 ITtest_bottom_to_top.cpp
+add_executable(accounting_test_bottom_to_top ${TEST_BOTTOM_TO_TOP_SOURCES})
+
+# 创建测试可执行文件 - 针对 ITtest_top_to_bottom.cpp
+add_executable(accounting_test_top_to_bottom ${TEST_INTEGRATION_SOURCES})
+
+# 链接 GoogleTest 库和项目的静态库
+target_link_libraries(accounting_test_bill PRIVATE accounting_lib GTest::GTest GTest::Main gcov)
+target_link_libraries(accounting_test_category PRIVATE accounting_lib GTest::GTest GTest::Main gcov)
+target_link_libraries(accounting_test_bottom_to_top PRIVATE accounting_lib GTest::GTest GTest::Main)
+target_link_libraries(accounting_test_top_to_bottom PRIVATE accounting_lib GTest::GTest GTest::Main)
+
+# 启用代码覆盖率分析
+target_compile_options(accounting_test_bill PRIVATE -fprofile-arcs -ftest-coverage -g)
+target_compile_options(accounting_test_category PRIVATE -fprofile-arcs -ftest-coverage -g)
+
+# 设置测试可执行文件的输出目录
+set_target_properties(accounting_test_bill PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
+)
+
+set_target_properties(accounting_test_category PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
+)
+
+set_target_properties(accounting_test_bottom_to_top PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
+)
+
+set_target_properties(accounting_test_top_to_bottom PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
+)
+
+
+# 启用测试功能
+enable_testing()
+
+# 添加 CTest 测试
+add_test(NAME AccountingTestBill COMMAND accounting_test_bill)
+add_test(NAME AccountingTestCategory COMMAND accounting_test_category)
+add_test(NAME AccountingTestBottomToTop COMMAND accounting_test_bottom_to_top)
+add_test(NAME AccountingTestTopToBottom COMMAND accounting_test_top_to_bottom)
+

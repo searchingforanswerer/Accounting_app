@@ -17,12 +17,20 @@ Report ReportManager::GenerateReport(int user_id,
     // 从 BillManager 获取用户账单
     std::vector<Bill> bills = bill_manager_->GetBillsByUser(user_id);
 
-    // 将 Bill 转为 BillData
+    // 将 Bill 转为 BillData，获取分类信息
     std::vector<BillData> bill_data_list;
     for (const auto& bill : bills) {
-        std::string category_name = bill.GetCategory() ? bill.GetCategory()->GetName() : "";
+        std::string category_name = "";
+        std::string category_type = "";  // 新增：获取分类类型
+        
+        if (bill.GetCategory()) {
+            category_name = bill.GetCategory()->GetName();
+            category_type = bill.GetCategory()->GetType();  // 新增：从 Category 获取 type
+        }
+        
         bill_data_list.emplace_back(bill.GetAmount(),
                                     category_name,
+                                    category_type,  // 新增：传递分类类型
                                     bill.GetTime(),
                                     bill.GetContent());
     }

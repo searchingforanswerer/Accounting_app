@@ -55,16 +55,20 @@ Report Report::Generate(const std::vector<BillData>& bills,
 
         double amount = bill.GetAmount();
         const std::string& category = bill.GetCategoryName();
+        const std::string& category_type = bill.GetCategoryType();  // 获取分类类型
 
-        // 若分类为空，归为“未分类”
+        // 若分类为空，归为"未分类"
         std::string key = category.empty() ? "Uncategorized" : category;
         category_summary[key] += amount;
 
-        // 根据金额正负判断收入/支出
-        if (amount >= 0)
+        // 根据分类类型判断收入/支出
+        // 修复 bug：使用 category_type 而不是 amount 的正负号
+        if (category_type == "income") {
             total_income += amount;
-        else
+        } else if (category_type == "expense") {
             total_expense += amount;
+        }
+        // 如果 category_type 为其他值（如 "exorin"），暂时不计入
     }
 
     Report report(period, chart_type, category_summary);

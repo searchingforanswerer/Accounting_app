@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/accounting_test_category.dir/test/test_category.cpp.o -o /home/zchcn/SE/Accounting/bin/accounting_test_category  lib/libaccounting_lib.a -lgcov /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a 

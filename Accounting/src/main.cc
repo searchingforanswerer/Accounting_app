@@ -11,8 +11,11 @@
 
 using namespace accounting;
 
+
+// ==================== 原有辅助函数 ====================
+
 // 辅助函数：将 Period 转为字符串
-std::string PeriodToString(Period period) {
+auto PeriodToString(Period period) -> std::string {
     switch (period) {
         case Period::kDaily: return "日";
         case Period::kWeekly: return "周";
@@ -91,6 +94,8 @@ int main() {
     }
     std::cout << "[√] 系统初始化完成\n";
 
+    // ==================== 原有功能测试 ====================
+
     // 步骤 2: 用户注册和登录
     PrintSeparator("步骤 2: 用户管理");
     
@@ -132,6 +137,7 @@ int main() {
     PrintSeparator("步骤 4: 账单管理");
     
     auto user_categories = account_manager.GetCategories(*user);
+
     if (user_categories.size() > 0) {
         // 创建几笔账单
         std::vector<Bill> test_bills;
@@ -231,6 +237,7 @@ int main() {
         Period::kMonthly,
         ChartType::kBar
     );
+
     std::cout << "[√] 生成月报表（柱状图，所有账单）:\n";
     PrintReport(monthly_report);
     

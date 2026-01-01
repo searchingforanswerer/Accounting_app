@@ -13,6 +13,7 @@ public:
 
     // 带参构造
     BillData(double amount, const std::string& category_name,
+             const std::string& category_type,
              const std::chrono::system_clock::time_point& time,
              const std::string& content);
 
@@ -27,6 +28,9 @@ public:
     const std::string& GetCategoryName() const;
     void SetCategoryName(const std::string& category_name);
 
+    const std::string& GetCategoryType() const;
+    void SetCategoryType(const std::string& category_type);
+
     std::chrono::system_clock::time_point GetTime() const;
     void SetTime(const std::chrono::system_clock::time_point& time);
 
@@ -39,6 +43,7 @@ public:
 private:
     double amount_;
     std::string category_name_;
+    std::string category_type_;  // 分类类型 ("expense", "income", 等)
     std::chrono::system_clock::time_point time_;
     std::string content_;
 };

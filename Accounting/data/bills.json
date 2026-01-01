@@ -1,0 +1,39 @@
+[
+    [
+        1,
+        [
+            {
+                "amount": 50.0,
+                "bill_id": 1,
+                "category_id": 1,
+                "content": "午餐",
+                "time": "2025-11-13 10:58:55"
+            },
+            {
+                "amount": 30.0,
+                "bill_id": 2,
+                "category_id": 2,
+                "content": "地铁",
+                "time": "2025-11-13 10:58:55"
+            },
+            {
+                "amount": 200.0,
+                "bill_id": 3,
+                "category_id": 4,
+                "content": "奖金",
+                "time": "2025-11-13 10:58:55"
+            },
+            {
+                "amount": 50.0,
+                "bill_id": 4,
+                "category_id": 1,
+                "content": "午餐",
+                "time": "2025-12-31 18:46:56"
+            }
+        ]
+    ],
+    [
+        2,
+        []
+    ]
+]
