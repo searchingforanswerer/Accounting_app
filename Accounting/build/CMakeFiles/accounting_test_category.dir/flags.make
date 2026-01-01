@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/zchcn/SE/Accounting/include -I/home/zchcn/SE/Accounting/nlohmann
 
-CXX_FLAGS = -g -fprofile-arcs -ftest-coverage -g -DGTEST_HAS_PTHREAD=1 -std=gnu++17
+CXX_FLAGS = -fprofile-arcs -ftest-coverage -g -DGTEST_HAS_PTHREAD=1 -std=gnu++17
 

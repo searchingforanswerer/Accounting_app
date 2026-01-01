@@ -1,1 +1,1 @@
-/usr/bin/c++ -g CMakeFiles/accounting_test_bottom_to_top.dir/test/ITtest_bottom_to_top.cpp.o -o /home/zchcn/SE/Accounting/bin/accounting_test_bottom_to_top  lib/libaccounting_lib.a /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a 
+/usr/bin/c++ CMakeFiles/accounting_test_bottom_to_top.dir/test/ITtest_bottom_to_top.cpp.o -o /home/zchcn/SE/Accounting/bin/accounting_test_bottom_to_top  lib/libaccounting_lib.a /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a 

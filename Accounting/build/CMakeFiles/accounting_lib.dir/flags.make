@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/zchcn/SE/Accounting/include -I/home/zchcn/SE/Accounting/nlohmann
 
-CXX_FLAGS = -g -Wall -Wextra -Wpedantic -std=gnu++17
+CXX_FLAGS = -Wall -Wextra -Wpedantic -std=gnu++17
 
