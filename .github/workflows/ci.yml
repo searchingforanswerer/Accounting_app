@@ -1,0 +1,37 @@
+name: C++ Project CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up C++ environment
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential g++ cmake
+      - name: Configure CMake project
+        run: |
+          cd Accounting
+          mkdir -p build
+          cd build
+          cmake ..
+      - name: Build project
+        run: |
+          cd Accounting/build
+          make
+      - name: Run tests with GTest
+        run: |
+          cd Accounting/bin
+          ./accounting_test_bill
+          ./accounting_test_category
+          ./accounting_test_top_to_bottom
+          ./accounting_test_bottom_to_top
