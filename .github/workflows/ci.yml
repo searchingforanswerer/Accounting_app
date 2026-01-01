@@ -14,20 +14,32 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Set up C++ environment
         run: |
           sudo apt update
           sudo apt install -y build-essential g++ cmake
+          sudo apt install -y libgtest-dev  # 安装 GTest
+
+      - name: Build GoogleTest
+        run: |
+          cd /usr/src/googletest
+          sudo cmake CMakeLists.txt
+          sudo make
+          sudo make install
+
       - name: Configure CMake project
         run: |
           cd Accounting
           mkdir -p build
           cd build
           cmake ..
+
       - name: Build project
         run: |
           cd Accounting/build
           make
+          
       - name: Run tests with GTest
         run: |
           cd Accounting/bin
