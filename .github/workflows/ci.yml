@@ -39,11 +39,11 @@ jobs:
         run: |
           cd Accounting/build
           make
-          
+
       - name: Run tests with GTest
         run: |
-          cd Accounting/bin
-          ./accounting_test_bill
-          ./accounting_test_category
-          ./accounting_test_top_to_bottom
-          ./accounting_test_bottom_to_top
+          cd Accounting
+          ./bin/accounting_test_bill
+          ./bin/accounting_test_category
+          ./bin/accounting_test_top_to_bottom
+          ./bin/accounting_test_bottom_to_top
